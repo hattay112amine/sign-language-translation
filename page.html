@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traduction Intelligente Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #002366;
+            --gold: #FFD700;
+            --light-gold: #FFF3BF;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .loading-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        #dropZone.dragover {
+            background-color: var(--light-gold);
+            border-color: var(--gold);
+            transform: scale(1.02);
+        }
+
+        .record-card {
+            transition: all 0.3s ease;
+            position: relative;
+            border: 1px solid rgba(0, 35, 102, 0.1);
+        }
+
+        .record-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 35, 102, 0.1);
+        }
+
+        .delete-btn {
+            transition: all 0.2s;
+            opacity: 0.7;
+        }
+
+        .delete-btn:hover {
+            opacity: 1;
+            color: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .smooth-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .navy-text {
+            color: var(--navy);
+        }
+
+        .gold-bg {
+            background-color: var(--gold);
+        }
+
+        .navy-bg {
+            background-color: var(--navy);
+        }
+
+        .gold-border {
+            border-color: var(--gold);
+        }
+
+        .navy-border {
+            border-color: var(--navy);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold navy-text mb-2">Traduction Intelligente Pro</h1>
+            <p class="text-gray-600 font-medium">Précision et Élégance Linguistique</p>
+        </header>
+
+        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8 smooth-transition">
+            <!-- Zone de dépôt d'image -->
+            <div id="uploadSection" class="mb-8">
+                <div id="dropZone" class="border-2 border-dashed navy-border rounded-xl p-8 text-center cursor-pointer hover:bg-blue-50 smooth-transition">
+                    <input type="file" id="imageInput" accept="image/*" class="hidden">
+                    <div class="space-y-4">
+                        <div class="navy-text">
+                            <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <p class="text-lg font-semibold navy-text">Déposer une image ici</p>
+                        <p class="text-gray-500 text-sm">Formats supportés : JPG, PNG, WEBP</p>
+                    </div>
+                </div>
+                <div id="imagePreview" class="hidden mt-6 text-center bg-gray-50 p-4 rounded-xl max-w-[90vw] mx-auto"></div>
+            </div>
+
+            <!-- Interface de traduction -->
+            <div id="translationInterface" class="hidden smooth-transition">
+                <div class="mb-8">
+                    <label class="block navy-text mb-3 font-medium">Langue cible :</label>
+                    <select id="languageSelect" class="w-full p-3 navy-border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="en">English</option>
+                        <option value="fr">Français</option>
+                        <option value="es">Español</option>
+                        <option value="de">Deutsch</option>
+                    </select>
+                </div>
+
+                <div class="mb-8">
+                    <label class="block navy-text mb-3 font-medium">Éditeur de texte :</label>
+                    <textarea id="translationText" 
+                            class="w-full p-4 navy-border rounded-lg h-48 focus:ring-2 focus:ring-blue-500 outline-none" 
+                            placeholder="Saisissez votre traduction ici..."
+                            rows="5"></textarea>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button id="saveBtn" class="gold-bg navy-text px-8 py-3 rounded-lg font-medium hover:bg-opacity-90 smooth-transition flex-1 shadow-md">
+                        Enregistrer
+                    </button>
+                    <button id="showRecords" class="navy-bg text-white px-8 py-3 rounded-lg font-medium hover:bg-opacity-90 smooth-transition flex-1 shadow-md">
+                        Historique
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Historique -->
+    <div id="recordsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto smooth-transition">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6 navy-bg text-white p-4 rounded-lg">
+                    <h3 class="text-2xl font-bold">Historique des traductions</h3>
+                    <button id="closeModal" class="text-white hover:text-gold smooth-transition">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Filtres -->
+                <div class="mb-6 flex flex-col md:flex-row gap-4 items-center">
+                    <select id="languageFilter" class="w-full md:w-48 p-3 navy-border rounded-lg bg-white focus:ring-2 focus:ring-blue-500">
+                        <option value="all">Toutes les langues</option>
+                        <option value="en">English</option>
+                        <option value="fr">Français</option>
+                        <option value="es">Español</option>
+                        <option value="de">Deutsch</option>
+                    </select>
+                    <span id="recordsCounter" class="text-sm navy-text font-medium"></span>
+                </div>
+
+                <!-- Liste des enregistrements -->
+                <div id="recordsList" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Le reste du JavaScript reste inchangé -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+            let records = JSON.parse(localStorage.getItem('translationRecords')) || [];
+            
+            // Gestion Drag & Drop
+            const dropZone = document.getElementById('dropZone');
+            const imageInput = document.getElementById('imageInput');
+            
+            // Événements Drag & Drop
+            dropZone.addEventListener('click', () => imageInput.click());
+            
+            ['dragenter', 'dragover'].forEach(event => {
+                dropZone.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(event => {
+                dropZone.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                    if(event === 'drop') handleImageUpload(e);
+                });
+            });
+
+            imageInput.addEventListener('change', handleImageUpload);
+
+            async function handleImageUpload(e) {
+                const file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
+                
+                if(file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    
+                    reader.onloadstart = () => {
+                        document.getElementById('imagePreview').innerHTML = `
+                            <div class="text-blue-600 py-8">
+                                <svg class="w-12 h-12 mx-auto animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                            </div>
+                        `;
+                        document.getElementById('imagePreview').classList.remove('hidden');
+                    };
+
+                    reader.onload = (event) => {
+                        showPreview(event.target.result);
+                        document.getElementById('translationInterface').classList.remove('hidden');
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            function showPreview(imageUrl) {
+                const preview = document.getElementById('imagePreview');
+                preview.innerHTML = `
+                    <img src="${imageUrl}" 
+                        class="w-full h-64 object-contain rounded-lg loading-pulse" 
+                        alt="Aperçu de l'image">
+                `;
+                
+                preview.querySelector('img').addEventListener('load', () => {
+                    preview.querySelector('img').classList.remove('loading-pulse');
+                });
+            }
+
+            // Sauvegarde des traductions
+            document.getElementById('saveBtn').addEventListener('click', () => {
+                const translationData = {
+                    id: generateId(),
+                    language: document.getElementById('languageSelect').value,
+                    text: document.getElementById('translationText').value,
+                    image: document.querySelector('#imagePreview img')?.src || '',
+                    date: new Date().toLocaleString('fr-FR', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit'
+                    })
+                };
+
+                if(!translationData.image) {
+                    alert('Veuillez d\'abord télécharger une image !');
+                    return;
+                }
+
+                records.push(translationData);
+                localStorage.setItem('translationRecords', JSON.stringify(records));
+                alert('Traduction sauvegardée avec succès !');
+            });
+
+            // Gestion de l'historique
+            document.getElementById('showRecords').addEventListener('click', () => {
+                const modal = document.getElementById('recordsModal');
+                const updateDisplay = () => {
+                    const selectedLang = document.getElementById('languageFilter').value;
+                    const filteredRecords = selectedLang === 'all' 
+                        ? records 
+                        : records.filter(record => record.language === selectedLang);
+
+                    document.getElementById('recordsList').innerHTML = filteredRecords
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
+                        .map(record => `
+                            <div class="record-card bg-white p-4 rounded-lg border">
+                                <button class="delete-btn absolute top-3 right-3 p-1" data-id="${record.id}">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                                <div class="flex gap-4 flex-col md:flex-row">
+                                    <img src="${record.image}" 
+                                        class="w-full md:w-1/3 h-48 object-contain rounded-lg bg-gray-100">
+                                    <div class="w-full md:w-2/3">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                                                ${record.date}
+                                            </span>
+                                            <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
+                                                ${document.querySelector(`#languageSelect option[value="${record.language}"]`).textContent}
+                                            </span>
+                                        </div>
+                                        <p class="text-gray-700 whitespace-pre-wrap break-words">${record.text}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('') || '<p class="text-center text-gray-500 py-8">Aucun enregistrement trouvé</p>';
+
+                    document.getElementById('recordsCounter').textContent = 
+                        `${filteredRecords.length} enregistrement${filteredRecords.length > 1 ? 's' : ''}`;
+                };
+
+                document.getElementById('languageFilter').addEventListener('change', updateDisplay);
+                document.getElementById('recordsList').addEventListener('click', (e) => {
+                    const deleteBtn = e.target.closest('.delete-btn');
+                    if (deleteBtn) {
+                        const recordId = deleteBtn.dataset.id;
+                        if (confirm('Supprimer cet enregistrement ?')) {
+                            records = records.filter(record => record.id !== recordId);
+                            localStorage.setItem('translationRecords', JSON.stringify(records));
+                            deleteBtn.closest('.record-card').style.opacity = '0';
+                            deleteBtn.closest('.record-card').style.transform = 'translateX(100%)';
+                            setTimeout(updateDisplay, 300);
+                        }
+                    }
+                });
+
+                updateDisplay();
+                modal.classList.remove('hidden');
+            });
+
+            // Fermeture du modal
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('recordsModal').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
