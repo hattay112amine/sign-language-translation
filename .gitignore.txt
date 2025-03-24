@@ -1,0 +1,52 @@
+# Exclure les fichiers de cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Exclure les environnements virtuels
+venv/
+env/
+.venv/
+.env/
+
+# Exclure les fichiers de dépendances
+pip-selfcheck.json
+Pipfile
+Pipfile.lock
+
+# Exclure les fichiers de configuration personnelle
+.vscode/
+.idea/
+.DS_Store
+
+# Exclure les fichiers de cache et de logs
+*.log
+*.sqlite3
+
+# Exclure les fichiers de données temporaires
+*.tmp
+*.temp
+
+# Exclure les fichiers de données générés par OpenCV ou MediaPipe
+*.jpg
+*.png
+*.mp4
+
+# Exclure les fichiers de configuration spécifiques au projet
+config.ini
+settings.json
+
+# Exclure les dossiers de données volumineux (si vous en avez)
+data/
+images/
+videos/
+
+# Exclure les fichiers de sauvegarde
+*.bak
+*.backup
+
+# Exclure les fichiers de dépendances Python (si vous utilisez un environnement virtuel)
+*.egg-info/
+dist/
+build/
